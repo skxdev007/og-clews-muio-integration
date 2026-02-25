@@ -2,6 +2,12 @@
 
 This fork of MUIO adds bidirectional integration with OG-Core (Overlapping Generations macroeconomic model).
 
+## Visualization
+
+![OG-Core Data Visualization in MUIO](docs/og_core_visualization.png)
+
+*Interactive visualization showing real OG-Core interest rates integrated into MUIO interface*
+
 ## What's Added
 
 ### 1. OG_CLEWS_Extension Directory
