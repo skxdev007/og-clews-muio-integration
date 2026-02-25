@@ -16,9 +16,17 @@ from Routes.Case.SyncS3Route import syncs3_api
 from Routes.Case.ViewDataRoute import viewdata_api
 from Routes.DataFile.DataFileRoute import datafile_api
 
+# OG-CLEWS Extension
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'OG_CLEWS_Extension'))
+from backend.og_routes import og_api
+
 #RADI
-template_dir = os.path.abspath('WebAPP')
-static_dir = os.path.abspath('WebAPP')
+# Get the directory where app.py is located
+app_dir = os.path.dirname(os.path.abspath(__file__))
+# WebAPP is one level up from API
+template_dir = os.path.abspath(os.path.join(app_dir, '..', 'WebAPP'))
+static_dir = os.path.abspath(os.path.join(app_dir, '..', 'WebAPP'))
 
 # template_dir = Config.WebAPP_PATH.resolve()
 # static_dir = Config.WebAPP_PATH.resolve()
@@ -50,6 +58,7 @@ app.register_blueprint(case_api)
 app.register_blueprint(viewdata_api)
 app.register_blueprint(datafile_api)
 app.register_blueprint(syncs3_api)
+app.register_blueprint(og_api)  # OG-CLEWS Extension
 
 CORS(app)
 

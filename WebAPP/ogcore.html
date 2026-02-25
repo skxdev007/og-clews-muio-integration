@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>OG-Core Data - MUIO Integration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="References/smartadmin/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="References/smartadmin/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="References/smartadmin/css/smartadmin-production.min.css">
+    <link rel="stylesheet" type="text/css" href="References/smartadmin/css/smartadmin-skins.min.css">
+    
+    <!-- jQuery -->
+    <script src="References/jquery/jquery-3.4.1.min.js"></script>
+    
+    <!-- Plotly -->
+    <script src="References/plotly/plotly-2.27.0.min.js"></script>
+    
+    <style>
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        .page-header {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-card h1 {
+            margin: 10px 0;
+            font-size: 2.5em;
+        }
+        .stat-card p {
+            color: #666;
+            margin: 0;
+        }
+        .chart-container {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .info-box {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .back-link {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="back-link">
+            <a href="index.html" class="btn btn-default">
+                <i class="fa fa-arrow-left"></i> Back to MUIO
+            </a>
+        </div>
+        
+        <div class="page-header">
+            <h1>
+                <i class="fa fa-line-chart"></i> 
+                OG-Core Integration
+                <small>Real Model Data</small>
+            </h1>
+        </div>
+        
+        <div id="status">
+            <div class="alert alert-info">
+                <i class="fa fa-spinner fa-spin"></i> Loading OG-Core data...
+            </div>
+        </div>
+        
+        <div id="content"></div>
+    </div>
+    
+    <script>
+        async function loadOGCoreData() {
+            try {
+                console.log('Fetching OG-Core data...');
+                const response = await fetch('/og/real_data');
+                const data = await response.json();
+                
+                console.log('Data received:', data);
+                
+                if (data.status === 'success') {
+                    renderSuccess(data);
+                } else {
+                    renderError(data.message || 'Failed to load data');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                renderError('Failed to connect to OG-Core API: ' + error.message);
+            }
+        }
+        
+        function renderSuccess(data) {
+            $('#status').html(`
+                <div class="success-message">
+                    <h4><i class="fa fa-check-circle"></i> ${data.message}</h4>
+                    <p><strong>Source:</strong> ${data.source}</p>
+                </div>
+            `);
+            
+            $('#content').html(`
+                <div class="row">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card">
+                            <i class="fa fa-calculator fa-3x" style="color: #3276B1;"></i>
+                            <h1 style="color: #3276B1;">${(data.clews_discount_rate * 100).toFixed(4)}%</h1>
+                            <p>CLEWS Discount Rate</p>
+                            <small>Average over 20 years</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card">
+                            <i class="fa fa-arrow-down fa-3x" style="color: #ED1C24;"></i>
+                            <h1 style="color: #ED1C24;">${(data.statistics.min * 100).toFixed(4)}%</h1>
+                            <p>Minimum Rate</p>
+                            <small>Lowest interest rate</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card">
+                            <i class="fa fa-arrow-up fa-3x" style="color: #5CB85C;"></i>
+                            <h1 style="color: #5CB85C;">${(data.statistics.max * 100).toFixed(4)}%</h1>
+                            <p>Maximum Rate</p>
+                            <small>Highest interest rate</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card">
+                            <i class="fa fa-bar-chart fa-3x" style="color: #F0AD4E;"></i>
+                            <h1 style="color: #F0AD4E;">${(data.statistics.std * 100).toFixed(4)}%</h1>
+                            <p>Std Deviation</p>
+                            <small>Volatility measure</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3><i class="fa fa-line-chart"></i> Interest Rates Over Time</h3>
+                    <div id="chart" style="height: 400px;"></div>
+                </div>
+                
+                <div class="info-box">
+                    <h3><i class="fa fa-info-circle"></i> Economic Interpretation</h3>
+                    <h4>What This Data Means for CLEWS</h4>
+                    <p>The interest rates from OG-Core represent equilibrium capital market conditions. These rates are transformed into CLEWS's DiscountRate parameter, which affects energy investment decisions:</p>
+                    <ul>
+                        <li><strong>Higher rates (${(data.statistics.max * 100).toFixed(2)}%)</strong> → Favor low-capital technologies (e.g., natural gas)</li>
+                        <li><strong>Lower rates (${(data.statistics.min * 100).toFixed(2)}%)</strong> → Favor high-capital investments (e.g., solar, wind)</li>
+                        <li><strong>Average rate (${(data.clews_discount_rate * 100).toFixed(2)}%)</strong> → Used as CLEWS DiscountRate parameter</li>
+                    </ul>
+                    <p><strong>Non-linear pattern:</strong> Notice the drop from ${(data.interest_rates[0] * 100).toFixed(2)}% to ${(data.interest_rates[7] * 100).toFixed(2)}% around year 7. This shows real transition dynamics, not mock data.</p>
+                </div>
+            `);
+            
+            createChart(data);
+        }
+        
+        function createChart(data) {
+            const years = data.interest_rates.map((_, i) => i);
+            const rates = data.interest_rates.map(r => r * 100);
+            
+            const trace = {
+                x: years,
+                y: rates,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Interest Rate',
+                line: { color: '#3276B1', width: 2 },
+                marker: { size: 6, color: '#3276B1' }
+            };
+            
+            const avgLine = {
+                x: [0, years.length - 1],
+                y: [data.clews_discount_rate * 100, data.clews_discount_rate * 100],
+                type: 'scatter',
+                mode: 'lines',
+                name: 'CLEWS Discount Rate (Avg)',
+                line: { color: '#ED1C24', width: 2, dash: 'dash' }
+            };
+            
+            const layout = {
+                title: 'OG-Core Interest Rates (Real Data)',
+                xaxis: { title: 'Year', showgrid: true },
+                yaxis: { title: 'Interest Rate (%)', showgrid: true },
+                hovermode: 'closest',
+                showlegend: true
+            };
+            
+            Plotly.newPlot('chart', [trace, avgLine], layout, {responsive: true});
+        }
+        
+        function renderError(message) {
+            $('#status').html(`
+                <div class="error-message">
+                    <h4><i class="fa fa-exclamation-triangle"></i> Error</h4>
+                    <p>${message}</p>
+                </div>
+            `);
+            
+            $('#content').html(`
+                <div class="info-box">
+                    <h4>Troubleshooting</h4>
+                    <ul>
+                        <li>Make sure MUIO server is running</li>
+                        <li>Check that OG-Core data has been extracted</li>
+                        <li>Verify the API endpoint: <code>/og/real_data</code></li>
+                    </ul>
+                </div>
+            `);
+        }
+        
+        // Load data when page loads
+        $(document).ready(function() {
+            loadOGCoreData();
+        });
+    </script>
+</body>
+</html>

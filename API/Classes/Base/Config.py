@@ -37,7 +37,14 @@ SOLVERs_FOLDER = Path('WebAPP', 'SOLVERs')
 # EXTRACT_FOLDER = Path(OSEMOSYS_ROOT, "")
 # SOLVERs_FOLDER = Path(OSEMOSYS_ROOT, 'WebAPP', 'SOLVERs')
 
-os.chmod(DATA_STORAGE, 0o777)
+# Create DataStorage if it doesn't exist
+if not os.path.exists(DATA_STORAGE):
+    os.makedirs(DATA_STORAGE, mode=0o777, exist_ok=True)
+else:
+    try:
+        os.chmod(DATA_STORAGE, 0o777)
+    except:
+        pass  # Ignore chmod errors on Windows
 
 HEROKU_DEPLOY = 0
 AWS_SYNC = 0

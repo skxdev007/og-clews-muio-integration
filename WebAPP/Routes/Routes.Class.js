@@ -145,6 +145,27 @@ export class Routes {
                 });
             });
         });
+        
+        // OG-Core Integration Route - Works independently without case requirement
+        crossroads.addRoute('/OGCore', function() {
+            $('#content').html('<h1 class="ajax-loading-animation"><i class="fa fa-cog fa-spin"></i> Loading...</h1>');
+            
+            // Directly load the OG-Core HTML content
+            $(".osy-content").load('ogcore.html #ogcore-content', function(response, status, xhr) {
+                if (status === "error") {
+                    console.error("Error loading OG-Core page:", xhr.status, xhr.statusText);
+                    $('#content').html('<h1>Error loading OG-Core page</h1>');
+                } else {
+                    console.log('OG-Core page loaded successfully');
+                    localStorage.setItem("osy-pageId", "OGCore");
+                    
+                    // Initialize the page after content is loaded
+                    if (typeof initOGCorePage === 'function') {
+                        initOGCorePage();
+                    }
+                }
+            });
+        });
 
         crossroads.bypassed.add(function(request) {
             console.error(request + ' seems to be a dead end...');
